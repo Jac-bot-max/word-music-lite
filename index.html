@@ -1,21 +1,20 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Music Lite - Sete Vidas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @keyframes rotate360 {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-        .animate-giro { animation: rotate360 3s ease-in-out; }
-        .text-glow { text-shadow: 0 0 15px #FFD700; }
-    </style>
-</head>
-<body class="bg-black text-white m-0 p-0 overflow-x-hidden font-sans">
-    <div id="root"></div>
-    <script src="app.js"></script>
-</body>
-</html>
+<style>
+    @keyframes giro-escrita {
+        0% { transform: rotateY(0deg) scale(0.5); opacity: 0; filter: blur(10px); }
+        50% { transform: rotateY(180deg) scale(1.1); opacity: 1; filter: blur(0px); }
+        100% { transform: rotateY(360deg) scale(1); opacity: 1; }
+    }
+    
+    @keyframes linha-magica {
+        0% { width: 0%; opacity: 0; }
+        100% { width: 80%; opacity: 1; }
+    }
+
+    .animate-giro-escrita {
+        animation: giro-escrita 3.5s ease-in-out forwards;
+    }
+
+    .animate-linha-magica {
+        animation: linha-magica 2s ease-in-out forwards 1.5s;
+    }
+</style>
