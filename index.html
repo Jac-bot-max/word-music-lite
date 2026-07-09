@@ -3,135 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Word Music Lite</title>
+    <title>Word Music Lite - Sete Vidas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        /* --- ANIMAÇÃO GIRASSOL ANDROID --- */
-        .sunflower { position: relative; width: 60px; height: 60px; animation: rotate 2s linear infinite; }
-        .sunflower div { position: absolute; width: 4px; height: 15px; background: #FFD700; border-radius: 10px; left: 28px; transform-origin: 2px 30px; box-shadow: 0 0 8px #FFD700; }
-        .sunflower div:nth-child(1) { transform: rotate(0deg); opacity: 1; }
-        .sunflower div:nth-child(2) { transform: rotate(30deg); opacity: 0.9; }
-        .sunflower div:nth-child(3) { transform: rotate(60deg); opacity: 0.8; }
-        .sunflower div:nth-child(4) { transform: rotate(90deg); opacity: 0.7; }
-        .sunflower div:nth-child(5) { transform: rotate(120deg); opacity: 0.6; }
-        .sunflower div:nth-child(6) { transform: rotate(150deg); opacity: 0.5; }
-        .sunflower div:nth-child(7) { transform: rotate(180deg); opacity: 0.4; }
-        .sunflower div:nth-child(8) { transform: rotate(210deg); opacity: 0.3; }
-        .sunflower div:nth-child(9) { transform: rotate(240deg); opacity: 0.2; }
-        .sunflower div:nth-child(10) { transform: rotate(270deg); opacity: 0.1; }
-        .sunflower div:nth-child(11) { transform: rotate(300deg); opacity: 0.1; }
-        .sunflower div:nth-child(12) { transform: rotate(330deg); opacity: 0.1; }
-        @keyframes rotate { 100% { transform: rotate(360deg); } }
-        @keyframes textAppear { from { opacity: 0; transform: scale(0.8); filter: blur(10px); } to { opacity: 1; transform: scale(1); filter: blur(0px); } }
-        .animate-brand { animation: textAppear 2s ease-out forwards; text-shadow: 0 0 20px #FFD700; }
+        :root { --gold: #FFD700; --red: #D32F2F; --dark: #121212; --card: #1c1c1c; }
+        body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+
+        /* --- ANIMAÇÕES MÁGICAS --- */
+        .sunflower { position: relative; width: 60px; height: 60px; animation: rotateSun 2s linear infinite; }
+        .sunflower div { position: absolute; width: 4px; height: 15px; background: var(--gold); border-radius: 10px; left: 28px; transform-origin: 2px 30px; box-shadow: 0 0 12px var(--gold); }
+        ${Array.from({length:12}).map((_,i)=>`.sunflower div:nth-child(${i+1}){transform:rotate(${i*30}deg); opacity:${1-(i*0.08)};}`).join('')}
+        @keyframes rotateSun { 100% { transform: rotate(360deg); } }
+
+        .animate-brand { animation: brandAnim 3.5s ease-in-out forwards; }
+        @keyframes brandAnim { 
+            0% { opacity: 0; transform: rotateY(0deg) scale(0.5); filter: blur(15px); }
+            50% { opacity: 1; transform: rotateY(180deg) scale(1.2); filter: blur(0px); text-shadow: 0 0 30px var(--gold); }
+            100% { opacity: 1; transform: rotateY(360deg) scale(1); text-shadow: 0 0 15px var(--gold); }
+        }
+
+        /* --- UI ESTILO FB LITE --- */
+        .fb-input { background: var(--card); border: 1px solid #333; padding: 14px; border-radius: 12px; width: 100%; outline: none; color: white; font-size: 15px; transition: 0.3s; }
+        .fb-input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+        
+        .nav-tab { flex: 1; display: flex; justify-content: center; align-items: center; padding: 14px; color: #888; font-size: 22px; position: relative; transition: 0.3s; }
+        .nav-tab.active { color: var(--red); }
+        .nav-tab.active::after { content: ''; position: absolute; bottom: 0; width: 60%; height: 3px; background: var(--red); border-radius: 10px 10px 0 0; }
+
+        .gold-glow { text-shadow: 0 0 10px var(--gold); }
+        .btn-shiny { background: linear-gradient(45deg, var(--red), #f44336); box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4); }
     </style>
 </head>
-<body class="bg-black text-white font-sans m-0 p-0 overflow-x-hidden">
+<body>
 
     <div id="app"></div>
 
     <script>
-        // --- LIGAÇÃO AO BANCO DE DADOS ---
-        const SUPABASE_URL = "https://jyulpbusldlldnxfjqjj.supabase.co"; // Já preenchi com o teu link
+        // --- CONFIGURAÇÃO ---
+        const SUPABASE_URL = "https://jyulpbusldlldnxfjqjj.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dWxwYnVzbGRsbGRueGZqcWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDQ4MDksImV4cCI6MjA5OTEyMDgwOX0.kzIzhthk8hJv-b0II7qx--AFdusPCenT4oPXrHr7UVg"; 
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const app = document.getElementById('app');
-        let currentUser = localStorage.getItem('wm_user') || "";
+        let profile = JSON.parse(localStorage.getItem('wm_profile')) || null;
+        let currentTab = 'home';
 
+        // --- ROTAS ---
         function go(page) {
+            window.scrollTo(0,0);
             if (page === 'splash') renderSplash();
-            if (page === 'login') renderLogin();
-            if (page === 'home') renderHome();
+            if (page === 'register') renderRegister();
+            if (page === 'home') renderMain();
+            if (page === 'profile') renderProfilePage();
         }
 
-        // 1. SPLASH SCREEN (Girassol + @7viDAS)
+        // 1. SPLASH SCREEN (ENTRADA)
         function renderSplash() {
             app.innerHTML = `
                 <div class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[999]">
                     <div class="sunflower mb-12">
-                        <div></div><div></div><div></div><div></div><div></div><div></div>
-                        <div></div><div></div><div></div><div></div><div></div><div></div>
+                        ${'<div></div>'.repeat(12)}
                     </div>
-                    <h1 id="b-text" class="text-4xl font-black italic text-[#FFD700] opacity-0">@7viDAS</h1>
-                </div>
-            `;
-            setTimeout(() => document.getElementById('b-text').classList.add('animate-brand'), 1500);
-            setTimeout(() => currentUser ? go('home') : go('login'), 5000);
+                    <h1 id="brand" class="text-5xl font-black italic text-[#FFD700] opacity-0 tracking-tighter">@7viDAS</h1>
+                    <p class="text-red-600 tracking-[6px] text-[10px] mt-6 uppercase font-bold opacity-60">Sete Vidas Music</p>
+                </div>`;
+            setTimeout(() => document.getElementById('brand').classList.add('animate-brand'), 1200);
+            setTimeout(() => profile ? go('home') : go('register'), 5500);
         }
 
-        // 2. LOGIN (Facebook Lite Style)
-        function renderLogin() {
+        // 2. REGISTO (MOÇAMBIQUE)
+        function renderRegister() {
             app.innerHTML = `
-                <div class="min-h-screen flex flex-col items-center justify-center p-6">
-                    <h1 class="text-[#FFD700] text-3xl font-black italic mb-10 text-center">Word Music Lite</h1>
-                    <div class="w-full max-w-sm space-y-4">
-                        <input id="u-name" type="text" placeholder="Teu Nome Artístico" class="w-full bg-[#1c1c1c] p-4 rounded-md border border-zinc-800 outline-none focus:border-[#D32F2F]">
-                        <button onclick="saveLogin()" class="w-full bg-[#D32F2F] text-white font-bold py-3 rounded-md shadow-lg active:scale-95 transition-all">ENTRAR NO RITMO</button>
+                <div class="min-h-screen p-8 flex flex-col">
+                    <h1 class="text-gold text-3xl font-black italic mb-2 gold-glow">Word Music Lite</h1>
+                    <p class="text-zinc-500 text-sm mb-10">Cria o teu perfil musical moçambicano.</p>
+                    
+                    <div class="space-y-4">
+                        <input id="reg-name" type="text" placeholder="Nome Artístico" class="fb-input">
+                        <input id="reg-user" type="text" placeholder="@usuario" class="fb-input">
+                        
+                        <select id="reg-prov" class="fb-input">
+                            <option value="">Província</option>
+                            <option>Maputo Cidade</option><option>Maputo Província</option><option>Gaza</option>
+                            <option>Inhambane</option><option>Sofala</option><option>Manica</option>
+                            <option>Tete</option><option>Zambézia</option><option>Nampula</option>
+                            <option>Niassa</option><option>Cabo Delgado</option>
+                        </select>
+                        
+                        <input id="reg-city" type="text" placeholder="Cidade/Bairro" class="fb-input">
+                        
+                        <select id="reg-job" class="fb-input">
+                            <option value="">O que tu fazes?</option>
+                            <option>Produtor Musical</option><option>Cantor</option><option>Compositor</option>
+                            <option>Beatmaker</option><option>DJ</option><option>Engenheiro de Som</option>
+                            <option>Instrumentista</option>
+                        </select>
+
+                        <button onclick="handleRegister()" class="w-full btn-shiny text-white font-bold py-4 rounded-xl mt-6 active:scale-95 transition-all uppercase tracking-wider">Começar Agora</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
-        function saveLogin() {
-            const val = document.getElementById('u-name').value;
-            if(val) { localStorage.setItem('wm_user', val); currentUser = val; go('home'); }
+        function handleRegister() {
+            const data = {
+                name: document.getElementById('reg-name').value,
+                user: document.getElementById('reg-user').value,
+                prov: document.getElementById('reg-prov').value,
+                city: document.getElementById('reg-city').value,
+                job: document.getElementById('reg-job').value,
+                bio: "Apaixonado pela música de Moçambique 🇲🇿",
+                nation: "Moçambicana"
+            };
+            if(!data.name || !data.user || !data.prov) return alert("Preenche os campos obrigatórios!");
+            localStorage.setItem('wm_profile', JSON.stringify(data));
+            profile = data;
+            go('home');
         }
 
-        // 3. PÁGINA INICIAL (Feed Real)
-        async function renderHome() {
+        // 3. ESTRUTURA PRINCIPAL (NAVBAR)
+        function renderMain() {
             app.innerHTML = `
-                <div class="pb-20">
-                    <nav class="sticky top-0 bg-[#1c1c1c] border-b border-zinc-800 flex justify-around p-1 z-50">
-                        <button class="p-3 text-[#D32F2F] border-b-2 border-[#D32F2F]">🏠</button>
-                        <button class="p-3 text-zinc-500 text-xl">🎞️</button>
+                <div class="min-h-screen bg-black">
+                    <nav class="sticky top-0 bg-[#1c1c1c] border-b border-zinc-800 flex z-50 shadow-lg">
+                        <button onclick="setTab('home')" class="nav-tab ${currentTab==='home'?'active':''}">🏠</button>
+                        <button onclick="setTab('shorts')" class="nav-tab ${currentTab==='shorts'?'active':''}">🎞️</button>
+                        <button class="nav-tab">🔔</button>
+                        <button onclick="go('profile')" class="nav-tab">👤</button>
                     </nav>
+                    <div id="content" class="pb-24"></div>
+                </div>`;
+            currentTab === 'home' ? renderFeed() : renderShorts();
+        }
 
-                    <div class="bg-[#1c1c1c] p-4 mt-2">
-                        <textarea id="post-input" placeholder="O que vais gravar hoje, ${currentUser}?" class="w-full bg-black text-white p-3 rounded-lg border border-zinc-800 outline-none h-20 text-sm"></textarea>
-                        <button onclick="publishPost()" id="btn-pub" class="w-full bg-[#D32F2F] py-2 mt-2 rounded-md font-bold text-sm shadow-md">PUBLICAR NO FEED</button>
+        function setTab(t) { currentTab = t; renderMain(); }
+
+        // --- FEED ---
+        function renderFeed() {
+            document.getElementById('content').innerHTML = `
+                <div class="bg-[#1c1c1c] p-4 mt-2 mb-2 border-y border-zinc-800">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-red-700 rounded-full flex items-center justify-center font-bold text-xs border border-gold">7V</div>
+                        <textarea id="p-input" placeholder="O que vais gravar hoje, ${profile.name}?" class="w-full bg-black text-white p-3 rounded-xl border border-zinc-800 outline-none h-16 text-sm"></textarea>
                     </div>
-
-                    <div id="feed" class="mt-2 space-y-2">
-                        <p class="text-center p-10 text-zinc-600 italic animate-pulse text-sm">A carregar talentos de Moçambique...</p>
+                    <div class="flex space-x-2">
+                        <button onclick="publishPost()" id="btn-pub" class="flex-1 btn-shiny py-3 rounded-lg font-bold text-xs">PUBLICAR FEED</button>
+                        <button class="bg-zinc-800 px-4 rounded-lg">🎵</button>
                     </div>
                 </div>
-            `;
+                <div id="feed-list" class="space-y-2"></div>`;
             loadPosts();
         }
 
+        // --- PÁGINA DE PERFIL (EDITÁVEL) ---
+        function renderProfilePage() {
+            app.innerHTML = `
+                <div class="min-h-screen bg-black">
+                    <div class="h-32 bg-gradient-to-r from-red-900 to-black relative">
+                        <button onclick="go('home')" class="absolute top-4 left-4 bg-black/50 p-2 rounded-full text-white">←</button>
+                    </div>
+                    <div class="px-6 -mt-12 relative flex flex-col items-center">
+                        <div class="w-24 h-24 bg-zinc-800 rounded-full border-4 border-black flex items-center justify-center text-4xl shadow-xl">👤</div>
+                        <h2 class="text-gold text-2xl font-bold mt-4">${profile.name}</h2>
+                        <p class="text-zinc-500 text-sm font-mono">${profile.user}</p>
+                        
+                        <div class="w-full mt-8 space-y-4 bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+                            <h3 class="font-bold border-b border-zinc-800 pb-2 mb-4 text-red-500 uppercase text-xs tracking-widest">Informações Artísticas</h3>
+                            <div><label class="text-[10px] text-zinc-500 uppercase">Profissão</label>
+                                <input id="edit-job" value="${profile.job}" class="w-full bg-transparent border-b border-zinc-800 py-1 outline-none focus:border-gold"></div>
+                            <div><label class="text-[10px] text-zinc-500 uppercase">Bio / Frase</label>
+                                <input id="edit-bio" value="${profile.bio}" class="w-full bg-transparent border-b border-zinc-800 py-1 outline-none focus:border-gold"></div>
+                            <div><label class="text-[10px] text-zinc-500 uppercase">Província</label>
+                                <p class="text-white">${profile.prov}</p></div>
+                            <button onclick="saveProfileChanges()" class="w-full bg-white text-black font-black py-3 rounded-xl mt-6 text-sm">GUARDAR ALTERAÇÕES</button>
+                            <button onclick="logout()" class="w-full text-red-600 text-xs mt-4">Terminar Sessão</button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function saveProfileChanges() {
+            profile.job = document.getElementById('edit-job').value;
+            profile.bio = document.getElementById('edit-bio').value;
+            localStorage.setItem('wm_profile', JSON.stringify(profile));
+            alert("Perfil atualizado! 🇲🇿");
+            go('home');
+        }
+
+        function logout() { localStorage.clear(); location.reload(); }
+
+        // --- LÓGICA DE DADOS ---
         async function publishPost() {
-            const txt = document.getElementById('post-input').value;
+            const txt = document.getElementById('p-input').value;
             if(!txt) return;
-            document.getElementById('btn-pub').innerText = "A enviar...";
-            
-            const { error } = await _supabase.from('posts').insert([{ username: currentUser, content: txt }]);
-            
-            if(!error) { document.getElementById('post-input').value = ""; loadPosts(); }
-            document.getElementById('btn-pub').innerText = "PUBLICAR NO FEED";
+            document.getElementById('btn-pub').innerText = "A Enviar...";
+            await _supabase.from('posts').insert([{ username: profile.user, content: txt, profession: profile.job }]);
+            document.getElementById('p-input').value = "";
+            loadPosts();
+            document.getElementById('btn-pub').innerText = "PUBLICAR FEED";
         }
 
         async function loadPosts() {
             const { data } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
-            const f = document.getElementById('feed');
-            if(data) {
-                f.innerHTML = data.map(p => `
-                    <div class="bg-[#1c1c1c] p-4 border-b border-black">
-                        <div class="flex items-center space-x-3 mb-3">
-                            <div class="w-10 h-10 bg-red-900 rounded-full flex items-center justify-center font-bold text-xs border border-red-700">7V</div>
+            const list = document.getElementById('feed-list');
+            if(data && list) {
+                list.innerHTML = data.map(p => `
+                    <div class="bg-[#1c1c1c] p-5 border-b border-black">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-zinc-800 rounded-full border border-zinc-700 flex items-center justify-center font-bold text-[10px] text-[#FFD700] shadow-inner">WM</div>
                             <div>
-                                <p class="font-bold text-sm text-[#FFD700]">${p.username}</p>
-                                <p class="text-zinc-600 text-[10px] uppercase font-mono">${new Date(p.created_at).toLocaleTimeString()}</p>
+                                <p class="font-bold text-sm text-[#FFD700] tracking-tight">${p.username}</p>
+                                <p class="text-zinc-600 text-[9px] uppercase tracking-tighter">${p.profession || 'Músico'} • ${new Date(p.created_at).toLocaleTimeString()}</p>
                             </div>
                         </div>
-                        <p class="text-sm leading-relaxed">${p.content}</p>
-                        <div class="flex justify-between mt-4 border-t border-zinc-800 pt-3 text-zinc-500 text-xs font-bold">
-                            <button>🔥 CURTIR</button><button>💬 COMENTAR</button><button>🚀 PARTILHAR</button>
+                        <p class="text-[15px] leading-relaxed text-zinc-200">${p.content}</p>
+                        <div class="flex justify-between mt-6 border-t border-zinc-800 pt-4 text-zinc-500 text-[11px] font-black italic">
+                            <button class="hover:text-red-500 transition-colors">🔥 CURTE</button>
+                            <button class="hover:text-gold transition-colors">💬 COMENTA</button>
+                            <button class="hover:text-blue-500 transition-colors">🚀 PARTILHA</button>
                         </div>
                     </div>
                 `).join('');
             }
+        }
+
+        function renderShorts() {
+            document.getElementById('content').innerHTML = `
+                <div class="flex flex-col items-center justify-center h-[70vh] text-center p-10">
+                    <div class="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center text-4xl mb-6 border border-red-900 animate-pulse">🎞️</div>
+                    <h2 class="text-gold font-bold text-xl uppercase tracking-widest">Shorts</h2>
+                    <p class="text-zinc-500 text-sm mt-2">Área para vídeos curtos de estúdio e ensaios.</p>
+                </div>`;
         }
 
         go('splash');
