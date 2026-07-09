@@ -6,131 +6,194 @@
     <title>Word Music Lite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Animação de Escrita Mágica e Giro */
-        @keyframes magicWriting {
-            0% { width: 0; opacity: 0; transform: rotateY(90deg); filter: blur(5px); }
-            50% { width: 100%; opacity: 1; transform: rotateY(180deg); filter: blur(0px); }
-            100% { width: 100%; opacity: 1; transform: rotateY(360deg); text-shadow: 0 0 20px #FFD700; }
-        }
-        
-        .magic-text {
-            display: inline-block;
-            overflow: hidden;
-            white-space: nowrap;
-            border-right: 2px solid #FFD700;
-            animation: magicWriting 3s ease-in-out forwards;
+        /* --- ANIMAÇÃO GIRASSOL (ESTILO ANDROID) --- */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        .bg-fb-dark { background-color: #000000; }
+        .sunflower {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            animation: rotate 2s linear infinite;
+        }
+
+        .sunflower div {
+            position: absolute;
+            width: 6px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 10px;
+            left: 37px;
+            transform-origin: 4px 40px;
+            box-shadow: 0 0 10px #FFD700;
+        }
+
+        /* Criando as 12 pétalas do girassol */
+        .sunflower div:nth-child(1) { transform: rotate(0deg); opacity: 1; }
+        .sunflower div:nth-child(2) { transform: rotate(30deg); opacity: 0.8; }
+        .sunflower div:nth-child(3) { transform: rotate(60deg); opacity: 0.7; }
+        .sunflower div:nth-child(4) { transform: rotate(90deg); opacity: 0.6; }
+        .sunflower div:nth-child(5) { transform: rotate(120deg); opacity: 0.5; }
+        .sunflower div:nth-child(6) { transform: rotate(150deg); opacity: 0.4; }
+        .sunflower div:nth-child(7) { transform: rotate(180deg); opacity: 0.3; }
+        .sunflower div:nth-child(8) { transform: rotate(210deg); opacity: 0.2; }
+        .sunflower div:nth-child(9) { transform: rotate(240deg); opacity: 0.1; }
+        .sunflower div:nth-child(10) { transform: rotate(270deg); opacity: 0.1; }
+        .sunflower div:nth-child(11) { transform: rotate(300deg); opacity: 0.1; }
+        .sunflower div:nth-child(12) { transform: rotate(330deg); opacity: 0.1; }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Efeito de Escrita Brilhante */
+        @keyframes fadeInText {
+            0% { opacity: 0; letter-spacing: 10px; filter: blur(10px); }
+            100% { opacity: 1; letter-spacing: 2px; filter: blur(0px); text-shadow: 0 0 20px #FFD700; }
+        }
+
+        .animate-text {
+            animation: fadeInText 2s ease-out forwards;
+        }
+
+        /* Cores Estilo Facebook Lite Dark */
+        .bg-fb-black { background-color: #000000; }
         .bg-fb-card { background-color: #1c1c1c; }
-        .text-gold { color: #FFD700; }
-        .btn-red { background-color: #D32F2F; }
+        .fb-border { border-color: #2a2a2a; }
     </style>
 </head>
-<body class="bg-fb-dark text-white font-sans overflow-x-hidden">
+<body class="bg-fb-black text-white font-sans m-0 p-0 overflow-x-hidden">
 
-    <div id="app">
-        <!-- O conteúdo será injetado aqui pelo JavaScript abaixo -->
-    </div>
+    <div id="app"></div>
 
     <script>
         const app = document.getElementById('app');
 
-        // FUNÇÃO PARA MUDAR DE PÁGINA
+        // Navegação
         function go(page) {
             if (page === 'splash') renderSplash();
             if (page === 'login') renderLogin();
             if (page === 'home') renderHome();
-            window.scrollTo(0,0);
         }
 
-        // 1. TELA DE ABERTURA (SPLASH)
+        // 1. TELA DE CARREGAMENTO (ESTILO ANDROID)
         function renderSplash() {
             app.innerHTML = `
                 <div class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[999]">
-                    <div class="relative">
-                        <h1 class="magic-text text-4xl font-black italic text-gold">@7viDAS</h1>
+                    <div class="loader-container">
+                        <!-- O Girassol / Spinner -->
+                        <div class="sunflower mb-10">
+                            <div></div><div></div><div></div><div></div>
+                            <div></div><div></div><div></div><div></div>
+                            <div></div><div></div><div></div><div></div>
+                        </div>
+                        
+                        <!-- O Nome aparecendo -->
+                        <h1 id="brand" class="text-4xl font-black italic text-[#FFD700] opacity-0">
+                            @7viDAS
+                        </h1>
                     </div>
-                    <p class="text-red-600 tracking-[5px] text-[10px] mt-4 opacity-70">SETE VIDAS MUSIC</p>
                 </div>
             `;
-            setTimeout(() => go('login'), 4000);
+
+            // Mostrar o nome após 2 segundos de carregamento
+            setTimeout(() => {
+                const brand = document.getElementById('brand');
+                brand.classList.add('animate-text');
+            }, 2000);
+
+            // Ir para o login após 5 segundos
+            setTimeout(() => go('login'), 5500);
         }
 
-        // 2. TELA DE LOGIN (ESTILO FB LITE)
+        // 2. TELA DE LOGIN (FACEBOOK LITE STYLE)
         function renderLogin() {
             app.innerHTML = `
                 <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-black">
-                    <h1 class="text-gold text-3xl font-black italic mb-8">Word Music Lite</h1>
-                    <div class="w-full max-w-sm space-y-3">
-                        <input type="text" placeholder="Telemóvel ou e-mail" class="w-full bg-fb-card p-3 rounded-md border border-zinc-800 outline-none text-sm">
-                        <input type="password" placeholder="Palavra-passe" class="w-full bg-fb-card p-3 rounded-md border border-zinc-800 outline-none text-sm">
-                        <button onclick="go('home')" class="w-full btn-red py-2.5 rounded-md font-bold text-white shadow-lg">Entrar</button>
-                        <p class="text-center text-blue-500 text-xs py-2">Esqueceu-se da palavra-passe?</p>
-                        <hr class="border-zinc-800">
-                        <button class="w-full bg-green-700 py-2 rounded-md font-bold text-sm text-white mx-auto block max-w-[200px]">Criar nova conta</button>
+                    <h1 class="text-[#FFD700] text-3xl font-black italic mb-10">Word Music Lite</h1>
+                    <div class="w-full max-w-sm space-y-4">
+                        <input type="text" placeholder="E-mail ou telemóvel" class="w-full bg-fb-card p-4 rounded-md border fb-border outline-none text-white focus:border-[#D32F2F]">
+                        <input type="password" placeholder="Palavra-passe" class="w-full bg-fb-card p-4 rounded-md border fb-border outline-none text-white focus:border-[#D32F2F]">
+                        <button onclick="go('home')" class="w-full bg-[#D32F2F] text-white font-bold py-3 rounded-md text-lg active:scale-95 transition-all shadow-lg">Entrar</button>
+                        
+                        <div class="text-center py-2">
+                            <a href="#" class="text-blue-500 text-sm">Esqueceu-se da palavra-passe?</a>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2 py-4">
+                            <div class="h-[1px] bg-zinc-800 w-full"></div>
+                            <span class="text-zinc-600 italic">ou</span>
+                            <div class="h-[1px] bg-zinc-800 w-full"></div>
+                        </div>
+
+                        <button class="w-full bg-green-700 text-white font-bold py-2 rounded-md max-w-[220px] mx-auto block">Criar nova conta</button>
                     </div>
                 </div>
             `;
         }
 
-        // 3. PÁGINA INICIAL (FEED ESTILO FACEBOOK LITE)
+        // 3. FEED (FACEBOOK LITE STYLE)
         function renderHome() {
             app.innerHTML = `
-                <div class="pb-20 bg-black min-h-screen">
-                    <!-- Nav Bar -->
-                    <nav class="sticky top-0 bg-fb-card border-b border-zinc-800 flex justify-around p-1 z-50">
-                        <button class="p-2 text-red-600 border-b-2 border-red-600 flex-1 flex justify-center">🏠</button>
-                        <button class="p-2 text-zinc-500 flex-1 flex justify-center">👥</button>
-                        <button class="p-2 text-zinc-500 flex-1 flex justify-center text-xl">🎞️</button>
-                        <button class="p-2 text-zinc-500 flex-1 flex justify-center">🔔</button>
-                        <button class="p-2 text-zinc-500 flex-1 flex justify-center">☰</button>
+                <div class="bg-black min-h-screen pb-20">
+                    <!-- Nav -->
+                    <nav class="sticky top-0 bg-fb-card border-b fb-border flex justify-around p-1 z-50">
+                        <button class="p-3 text-red-600 border-b-2 border-red-600">🏠</button>
+                        <button class="p-3 text-zinc-500">👥</button>
+                        <button class="p-3 text-zinc-500">🎞️</button>
+                        <button class="p-3 text-zinc-500">🔔</button>
+                        <button class="p-3 text-zinc-500">☰</button>
                     </nav>
 
-                    <!-- Status Post -->
-                    <div class="bg-fb-card p-3 mt-2 flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-red-900 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs">7V</div>
-                        <div class="bg-black text-zinc-500 rounded-full px-4 py-2 w-full text-sm border border-zinc-800">
-                            O que estás a gravar agora?
+                    <!-- Status -->
+                    <div class="bg-fb-card p-4 mt-2 flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-red-900 rounded-full flex items-center justify-center font-bold">7V</div>
+                        <div class="bg-black text-zinc-500 rounded-full px-4 py-2 w-full text-sm border fb-border">
+                            O que vais gravar hoje?
                         </div>
                     </div>
-                    <div class="bg-fb-card flex border-t border-zinc-800 py-2">
-                        <button class="flex-1 text-[10px] text-red-500 font-bold border-r border-zinc-800">📷 IMAGEM</button>
-                        <button class="flex-1 text-[10px] text-gold font-bold border-r border-zinc-800">🎵 ÁUDIO</button>
-                        <button class="flex-1 text-[10px] text-blue-500 font-bold">🎥 VÍDEO</button>
+                    
+                    <div class="bg-fb-card flex border-t fb-border py-2 text-[10px] font-bold">
+                        <button class="flex-1 text-red-500">📷 IMAGEM</button>
+                        <button class="flex-1 text-[#FFD700]">🎵 ÁUDIO</button>
+                        <button class="flex-1 text-blue-500">🎥 VÍDEO</button>
                     </div>
 
                     <!-- FEED -->
                     <div class="mt-2 space-y-2">
-                        ${Post("Sete Vidas Music", "A preparar o próximo hit para o Word Music! 🇲🇿", "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=400&q=80")}
-                        ${Post("Jackson Beatz", "Nampula na casa! Quem quer beats novos?", null)}
+                        ${PostCard("Sete Vidas", "Bem-vindos ao Word Music Lite! A maior rede de músicos de Moçambique 🇲🇿", "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400")}
+                        ${PostCard("Jackson Beatz", "Produtores de Nampula, vamos nos unir?", null)}
                     </div>
                 </div>
             `;
         }
 
-        function Post(user, text, img) {
+        function PostCard(name, text, img) {
             return `
                 <div class="bg-fb-card p-4">
                     <div class="flex items-center space-x-2 mb-3">
-                        <div class="w-9 h-9 bg-zinc-700 rounded-full"></div>
+                        <div class="w-10 h-10 bg-zinc-800 rounded-full border border-zinc-700"></div>
                         <div>
-                            <p class="font-bold text-sm text-gold">${user}</p>
-                            <p class="text-zinc-500 text-[10px]">Justamente agora • Moçambique</p>
+                            <p class="font-bold text-sm text-[#FFD700]">${name}</p>
+                            <p class="text-zinc-600 text-[10px]">Agora mesmo • Moçambique</p>
                         </div>
                     </div>
-                    <p class="text-sm mb-3">${text}</p>
-                    ${img ? `<img src="${img}" class="w-full rounded-sm border border-zinc-800 mb-3">` : ''}
-                    <div class="flex justify-between border-t border-zinc-800 pt-3 text-zinc-400 text-xs font-bold">
-                        <button class="flex items-center space-x-1"><span>🔥</span> <span>Curte</span></button>
-                        <button class="flex items-center space-x-1"><span>💬</span> <span>Comenta</span></button>
-                        <button class="flex items-center space-x-1"><span>🚀</span> <span>Partilha</span></button>
+                    <p class="text-sm mb-4">${text}</p>
+                    ${img ? `<img src="${img}" class="w-full rounded-md mb-4 border fb-border">` : ''}
+                    <div class="flex justify-between border-t fb-border pt-3 text-zinc-400 text-xs">
+                        <button>🔥 Curtir</button>
+                        <button>💬 Comentar</button>
+                        <button>🚀 Partilhar</button>
                     </div>
                 </div>
             `;
         }
 
-        // INICIAR O SITE
+        // Iniciar
         go('splash');
     </script>
 </body>
