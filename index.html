@@ -3,44 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Word Music Pro - Sete Vidas</title>
+    <title>Word Music Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        :root { --gold: #FFD700; --red: #D32F2F; --black: #000; --card: #121212; }
-        body { background-color: var(--black); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        :root { --gold: #FFD700; --red: #D32F2F; --fb-card: #1c1c1c; }
+        body { background-color: #000; color: white; font-family: Helvetica, Arial, sans-serif; margin: 0; }
 
-        /* SPLASH SCREEN MÁGICA */
+        /* GIRASSOL ANDROID */
         .sunflower { position: relative; width: 60px; height: 60px; animation: rotateSun 2s linear infinite; }
-        .sunflower div { position: absolute; width: 4px; height: 15px; background: var(--gold); border-radius: 10px; left: 28px; transform-origin: 2px 30px; box-shadow: 0 0 12px var(--gold); }
-        .sunflower div:nth-child(1) { transform: rotate(0deg); opacity: 1; }
-        .sunflower div:nth-child(2) { transform: rotate(30deg); opacity: 0.9; }
-        .sunflower div:nth-child(3) { transform: rotate(60deg); opacity: 0.8; }
-        .sunflower div:nth-child(4) { transform: rotate(90deg); opacity: 0.7; }
-        .sunflower div:nth-child(5) { transform: rotate(120deg); opacity: 0.6; }
-        .sunflower div:nth-child(6) { transform: rotate(150deg); opacity: 0.5; }
-        .sunflower div:nth-child(7) { transform: rotate(180deg); opacity: 0.4; }
-        .sunflower div:nth-child(8) { transform: rotate(210deg); opacity: 0.3; }
-        .sunflower div:nth-child(9) { transform: rotate(240deg); opacity: 0.2; }
-        .sunflower div:nth-child(10) { transform: rotate(270deg); opacity: 0.1; }
-        .sunflower div:nth-child(11) { transform: rotate(300deg); opacity: 0.1; }
-        .sunflower div:nth-child(12) { transform: rotate(330deg); opacity: 0.1; }
+        .sunflower div { position: absolute; width: 4px; height: 15px; background: var(--gold); border-radius: 10px; left: 28px; transform-origin: 2px 30px; box-shadow: 0 0 10px var(--gold); }
+        ${Array.from({length:12}).map((_,i)=>`.sunflower div:nth-child(${i+1}){transform:rotate(${i*30}deg); opacity:${1-(i*0.08)};}`).join('')}
         @keyframes rotateSun { 100% { transform: rotate(360deg); } }
+        .animate-7v { animation: magicWriting 3.5s ease-in-out forwards; text-shadow: 0 0 20px var(--gold); }
+        @keyframes magicWriting { 0% { opacity: 0; transform: rotateY(0deg) scale(0.5); filter: blur(10px); } 100% { opacity: 1; transform: rotateY(360deg) scale(1); filter: blur(0px); } }
 
-        .magic-brand { animation: magicWriting 3.5s ease-in-out forwards; text-shadow: 0 0 20px var(--gold); }
-        @keyframes magicWriting { 
-            0% { opacity: 0; transform: rotateY(0deg) scale(0.5); filter: blur(15px); }
-            50% { opacity: 1; transform: rotateY(180deg) scale(1.2); filter: blur(0px); }
-            100% { opacity: 1; transform: rotateY(360deg) scale(1); }
-        }
-
-        /* UI COMPONENTS */
-        .fb-input { background: var(--card); border: 1px solid #222; padding: 14px; border-radius: 10px; width: 100%; outline: none; color: #fff; font-size: 14px; transition: 0.3s; }
-        .fb-input:focus { border-color: var(--gold); }
+        /* UI FACEBOOK LITE */
         .nav-bottom { position: fixed; bottom: 0; width: 100%; background: #080808; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 10px; }
-        .nav-item.active { color: var(--gold); }
-        .nav-item span:first-child { font-size: 22px; margin-bottom: 2px; }
+        .nav-item.active { color: var(--red); }
+        .fb-input { background: #121212; border: 1px solid #222; padding: 12px; border-radius: 8px; width: 100%; color: white; outline: none; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -48,118 +30,66 @@
 <div id="app"></div>
 
 <script>
-    // --- CONFIGURAÇÃO ---
+    // --- LIGAÇÃO AO BANCO DE DADOS (SUPABASE) ---
     const SUPABASE_URL = "https://jyulpbusldlldnxfjqjj.supabase.co";
+    // ATENÇÃO: COLA A TUA CHAVE ABAIXO PARA O FEED FUNCIONAR!
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dWxwYnVzbGRsbGRueGZqcWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDQ4MDksImV4cCI6MjA5OTEyMDgwOX0.kzIzhthk8hJv-b0II7qx--AFdusPCenT4oPXrHr7UVg"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const app = document.getElementById('app');
     let profile = JSON.parse(localStorage.getItem('wm_profile_pro')) || null;
-    let lang = profile ? profile.lang : 'pt';
     let currentTab = 'home';
-
-    // DICIONÁRIO DE TRADUÇÃO
-    const i18n = {
-        pt: { welcome: "Cria o teu Perfil Musical", name: "Nome Artístico", user: "@usuario", country: "País", prov: "Província (se em MZ)", job: "Profissão Musical", bio: "Biografia", btn: "ENTRAR NO WORD MUSIC", jobs: ["Produtor", "Cantor", "Beatmaker", "DJ", "Compositor", "Engenheiro de Som", "Instrumentista", "Rapper", "Manager"], provs: ["Maputo Cidade", "Maputo Província", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Niassa", "Cabo Delgado"] },
-        en: { welcome: "Create Your Music Profile", name: "Stage Name", user: "@username", country: "Country", prov: "Province (if MZ)", job: "Musical Profession", bio: "Biography", btn: "JOIN WORD MUSIC", jobs: ["Producer", "Singer", "Beatmaker", "DJ", "Songwriter", "Sound Engineer", "Instrumentalist", "Rapper", "Manager"], provs: ["Maputo City", "Maputo Province", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Niassa", "Cabo Delgado"] },
-        fr: { welcome: "Créez Votre Profil Musical", name: "Nom de Scène", user: "@nom_utilisateur", country: "Pays", prov: "Province (si MZ)", job: "Profession Musicale", bio: "Biographie", btn: "REJOINDRE WORD MUSIC", jobs: ["Producteur", "Chanteur", "Beatmaker", "DJ", "Compositeur", "Ingénieur du Son", "Instrumentiste", "Rapper", "Manager"], provs: ["Maputo Ville", "Maputo Province", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Niassa", "Cabo Delgado"] }
-    };
 
     function go(page) {
         if (page === 'splash') renderSplash();
         else if (!profile) renderRegister();
-        else { currentTab = page; renderMain(); }
+        else { currentTab = page; renderApp(); }
     }
 
-    // 1. SPLASH SCREEN
+    // 1. SPLASH SCREEN (ENTRADA)
     function renderSplash() {
         app.innerHTML = `
             <div class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[999]">
-                <div class="sunflower mb-12">
-                    ${'<div></div>'.repeat(12)}
-                </div>
-                <h1 id="logo" class="text-5xl font-black italic text-[#FFD700] opacity-0 tracking-tighter">@7viDAS</h1>
-                <p class="text-red-600 tracking-[5px] text-[10px] mt-6 uppercase opacity-50">Sete Vidas Music</p>
+                <div class="sunflower mb-12">${'<div></div>'.repeat(12)}</div>
+                <h1 id="logo" class="text-5xl font-black italic text-[#FFD700] opacity-0">@7viDAS</h1>
             </div>`;
-        setTimeout(() => document.getElementById('logo').classList.add('magic-brand'), 1000);
-        setTimeout(() => go('home'), 5500);
+        setTimeout(() => document.getElementById('logo').classList.add('animate-7v'), 1000);
+        setTimeout(() => go('home'), 5000);
     }
 
-    // 2. CADASTRO COMPLETO (INTERNACIONAL)
+    // 2. CADASTRO (IGUAL AO FACEBOOK)
     function renderRegister() {
         app.innerHTML = `
-            <div class="p-8 min-h-screen bg-black overflow-y-auto">
-                <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-gold text-2xl font-black italic">Word Music Pro</h1>
-                    <select onchange="changeLang(this.value)" class="bg-zinc-900 text-xs p-2 rounded border border-zinc-800">
-                        <option value="pt" ${lang==='pt'?'selected':''}>PT</option>
-                        <option value="en" ${lang==='en'?'selected':''}>EN</option>
-                        <option value="fr" ${lang==='fr'?'selected':''}>FR</option>
-                    </select>
-                </div>
-                
-                <h2 class="text-xl font-bold mb-6">${i18n[lang].welcome}</h2>
-                
+            <div class="p-8 min-h-screen">
+                <h1 class="text-gold text-2xl font-black italic mb-8 italic">Word Music Pro</h1>
+                <h2 class="text-xl font-bold mb-6">Criar nova conta</h2>
                 <div class="space-y-4">
-                    <input id="r-name" type="text" placeholder="${i18n[lang].name}" class="fb-input">
-                    <input id="r-user" type="text" placeholder="${i18n[lang].user}" class="fb-input">
-                    
-                    <select id="r-country" class="fb-input" onchange="toggleProv(this.value)">
-                        <option value="Moçambique">Moçambique</option>
-                        <option value="Outro">Outro País (Mundo)</option>
-                    </select>
-
-                    <select id="r-prov" class="fb-input">
-                        <option value="">${i18n[lang].prov}</option>
-                        ${i18n[lang].provs.map(p => `<option value="${p}">${p}</option>`).join('')}
-                    </select>
-
+                    <input id="r-name" type="text" placeholder="Nome Artístico" class="fb-input">
+                    <input id="r-user" type="text" placeholder="@usuario" class="fb-input">
                     <select id="r-job" class="fb-input">
-                        <option value="">${i18n[lang].job}</option>
-                        ${i18n[lang].jobs.map(j => `<option value="${j}">${j}</option>`).join('')}
+                        <option>Produtor</option><option>Cantor</option><option>Beatmaker</option><option>DJ</option>
                     </select>
-
-                    <textarea id="r-bio" placeholder="${i18n[lang].bio}" class="fb-input h-24"></textarea>
-
-                    <button onclick="saveProfile()" class="w-full bg-red-700 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all">
-                        ${i18n[lang].btn}
-                    </button>
+                    <button onclick="saveReg()" class="w-full bg-red-700 py-3 rounded-lg font-bold mt-4">CRIAR PERFIL</button>
                 </div>
             </div>`;
     }
 
-    function changeLang(l) { lang = l; renderRegister(); }
-    
-    function toggleProv(val) {
-        document.getElementById('r-prov').style.display = (val === 'Moçambique') ? 'block' : 'none';
-    }
-
-    function saveProfile() {
-        const d = {
-            name: document.getElementById('r-name').value,
-            user: document.getElementById('r-user').value,
-            country: document.getElementById('r-country').value,
-            prov: document.getElementById('r-prov').value,
-            job: document.getElementById('r-job').value,
-            bio: document.getElementById('r-bio').value,
-            lang: lang
-        };
-        if(!d.name || !d.user) return alert("Erro: Nome e @usuario obrigatórios!");
+    function saveReg() {
+        const d = { name: document.getElementById('r-name').value, user: document.getElementById('r-user').value, job: document.getElementById('r-job').value };
+        if(!d.name || !d.user) return alert("Preenche os dados!");
         localStorage.setItem('wm_profile_pro', JSON.stringify(d));
         profile = d; go('home');
     }
 
-    // 3. APP PRINCIPAL (ESTILO PROFISSIONAL)
-    function renderMain() {
+    // 3. APP PRINCIPAL
+    function renderApp() {
         app.innerHTML = `
-            <div class="pb-24 min-h-screen">
-                <header class="p-4 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-md z-50 border-b border-zinc-900">
+            <div class="pb-24">
+                <header class="p-4 flex justify-between items-center sticky top-0 bg-black border-b border-zinc-900 z-50">
                     <h1 class="text-gold font-black italic text-xl">Word Music</h1>
-                    <div class="flex space-x-4"><span>🔍</span><span onclick="go('profile')" class="cursor-pointer">👤</span></div>
+                    <div class="flex space-x-4"><span>🔍</span><span>👤</span></div>
                 </header>
-                
-                <div id="content"></div>
-
+                <div id="view"></div>
                 <nav class="nav-bottom">
                     <button onclick="go('home')" class="nav-item ${currentTab==='home'?'active':''}"><span>🏠</span><span>Feed</span></button>
                     <button onclick="go('shorts')" class="nav-item ${currentTab==='shorts'?'active':''}"><span>🎞️</span><span>Shorts</span></button>
@@ -167,92 +97,106 @@
                     <button onclick="go('profile')" class="nav-item ${currentTab==='profile'?'active':''}"><span>👤</span><span>Perfil</span></button>
                 </nav>
             </div>`;
-
-        if(currentTab === 'home') renderFeed();
-        if(currentTab === 'profile') renderProfile();
-        if(currentTab === 'shorts') renderShorts();
-        if(currentTab === 'chat') renderChat();
+        
+        const v = document.getElementById('view');
+        if(currentTab === 'home') renderFeed(v);
+        if(currentTab === 'profile') renderProfile(v);
+        if(currentTab === 'shorts') renderShorts(v);
+        if(currentTab === 'chat') renderChat(v);
     }
 
-    function renderFeed() {
-        const c = document.getElementById('content');
-        c.innerHTML = `
-            <div class="p-4 bg-zinc-900 m-4 rounded-2xl">
-                <textarea id="post-txt" placeholder="O que vais gravar, ${profile.name}?" class="w-full bg-transparent outline-none h-12 text-sm"></textarea>
-                <button onclick="sendPost()" class="w-full bg-red-700 py-2 rounded-lg text-xs font-bold mt-2">PUBLICAR</button>
+    // --- MÓDULO FEED (ESTILO FACEBOOK LITE) ---
+    function renderFeed(v) {
+        v.innerHTML = `
+            <!-- Caixa Criar Publicação -->
+            <div class="bg-fb-card p-4 mb-2 shadow-md">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-red-900 rounded-full flex items-center justify-center font-bold text-xs border border-gold">7V</div>
+                    <div onclick="document.getElementById('modal-post').classList.remove('hidden')" class="w-full bg-black/50 text-zinc-500 rounded-full px-4 py-2 text-sm border border-zinc-800">
+                        No que estás a pensar, ${profile.name}?
+                    </div>
+                </div>
+                <div class="flex border-t border-zinc-800 pt-2">
+                    <button class="flex-1 text-[10px] font-bold text-red-500">📷 FOTO</button>
+                    <button class="flex-1 text-[10px] font-bold text-gold border-x border-zinc-800">🎵 MÚSICA</button>
+                    <button class="flex-1 text-[10px] font-bold text-blue-500">🎥 VÍDEO</button>
+                </div>
             </div>
-            <div id="post-list" class="space-y-4 px-4"></div>`;
+
+            <!-- Modal de Escrita -->
+            <div id="modal-post" class="fixed inset-0 bg-black z-[100] p-6 hidden flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="document.getElementById('modal-post').classList.add('hidden')" class="text-zinc-400 text-sm">Cancelar</button>
+                    <h3 class="font-bold">Criar publicação</h3>
+                    <button onclick="sendPost()" class="bg-red-700 px-4 py-1 rounded text-sm font-bold">Publicar</button>
+                </div>
+                <textarea id="p-txt" placeholder="O que vais gravar hoje?" class="w-full bg-transparent text-xl outline-none flex-1 resize-none"></textarea>
+            </div>
+
+            <div id="feed-list" class="space-y-2">
+                <p class="text-center p-10 text-zinc-600 animate-pulse italic">A carregar o feed de Moçambique...</p>
+            </div>`;
         loadPosts();
     }
 
-    // --- PERFIL BANDLAB STYLE ---
-    function renderProfile() {
-        const c = document.getElementById('content');
-        c.innerHTML = `
-            <div class="h-40 bg-gradient-to-b from-red-800 to-black relative flex items-end p-6">
-                <div class="w-24 h-24 bg-zinc-800 rounded-2xl border-2 border-gold shadow-2xl flex items-center justify-center text-4xl">👤</div>
-            </div>
-            <div class="p-6 pt-2">
-                <h2 class="text-2xl font-bold text-gold">${profile.name}</h2>
-                <p class="text-zinc-500 text-sm italic">${profile.job} • ${profile.country}</p>
-                <p class="mt-4 text-sm text-zinc-300 leading-relaxed">${profile.bio}</p>
-                
-                <div class="flex space-x-6 mt-8 border-y border-zinc-900 py-6 text-center">
-                    <div class="flex-1 font-bold">0 <span class="block text-[8px] uppercase text-zinc-500">Músicas</span></div>
-                    <div class="flex-1 font-bold">0 <span class="block text-[8px] uppercase text-zinc-500">Seguidores</span></div>
-                    <div class="flex-1 font-bold">0 <span class="block text-[8px] uppercase text-zinc-500">Votos</span></div>
-                </div>
-
-                <button onclick="localStorage.clear(); location.reload();" class="mt-20 w-full text-zinc-800 text-[10px] tracking-[4px] uppercase">Sair da Conta</button>
-            </div>`;
-    }
-
-    function renderShorts() {
-        document.getElementById('content').innerHTML = `
-            <div class="h-[80vh] flex flex-col items-center justify-center text-center">
-                <div class="text-6xl animate-bounce">🎞️</div>
-                <h2 class="text-gold font-bold mt-4">SHORTS</h2>
-                <p class="text-zinc-600 text-sm px-10">Vídeos curtos musicais em breve no Word Music Pro.</p>
-            </div>`;
-    }
-
-    function renderChat() {
-        document.getElementById('content').innerHTML = `
-            <div class="p-6">
-                <h2 class="text-xl font-bold mb-6">Mensagens</h2>
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-4 bg-zinc-900 p-4 rounded-xl border-l-4 border-red-600 opacity-50">
-                        <div class="w-10 h-10 bg-zinc-800 rounded-full"></div>
-                        <div><p class="font-bold text-sm">Sete Vidas Music</p><p class="text-xs">Olá! Bem-vindo ao Word Music Pro.</p></div>
-                    </div>
-                </div>
-            </div>`;
-    }
-
-    // --- DATA LOGIC ---
+    // --- FUNÇÕES DE DADOS REAIS ---
     async function loadPosts() {
-        const { data } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
-        const list = document.getElementById('post-list');
+        const { data, error } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
+        const list = document.getElementById('feed-list');
+        if(error) {
+            list.innerHTML = `<p class="text-center p-10 text-red-500">Erro ao carregar feed. Verifica a tua chave API.</p>`;
+            return;
+        }
         if(data && list) {
             list.innerHTML = data.map(p => `
-                <div class="p-4 bg-[#121212] rounded-xl border border-zinc-900">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center text-xs text-gold border border-zinc-700">7V</div>
-                        <div><p class="font-bold text-sm">${p.username}</p><p class="text-[9px] text-zinc-600">${new Date(p.created_at).toLocaleTimeString()}</p></div>
+                <div class="bg-fb-card mb-2 border-b border-zinc-900 shadow-sm">
+                    <div class="p-4 flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-zinc-800 rounded-full border border-zinc-700 flex items-center justify-center font-bold text-xs text-gold">WM</div>
+                        <div>
+                            <p class="font-bold text-sm text-gold">${p.username}</p>
+                            <p class="text-zinc-600 text-[10px] uppercase font-mono">${new Date(p.created_at).toLocaleString()}</p>
+                        </div>
                     </div>
-                    <p class="text-sm leading-relaxed">${p.content}</p>
+                    <div class="px-4 pb-4">
+                        <p class="text-sm leading-relaxed">${p.content}</p>
+                    </div>
+                    <div class="flex justify-around border-t border-zinc-900 py-3 text-zinc-500 text-xs font-bold uppercase italic">
+                        <button class="flex items-center space-x-1"><span>🔥</span><span>Curte</span></button>
+                        <button class="flex items-center space-x-1"><span>💬</span><span>Comenta</span></button>
+                        <button class="flex items-center space-x-1"><span>🚀</span><span>Partilha</span></button>
+                    </div>
                 </div>
             `).join('');
         }
     }
 
     async function sendPost() {
-        const t = document.getElementById('post-txt').value;
+        const t = document.getElementById('p-txt').value;
         if(!t) return;
-        await _supabase.from('posts').insert([{ username: profile.user, content: t }]);
-        document.getElementById('post-txt').value = "";
-        loadPosts();
+        const { error } = await _supabase.from('posts').insert([{ username: profile.user, content: t }]);
+        if(!error) {
+            document.getElementById('p-txt').value = "";
+            document.getElementById('modal-post').classList.add('hidden');
+            loadPosts();
+        } else {
+            alert("Erro ao publicar!");
+        }
     }
+
+    // --- OUTRAS ABAS ---
+    function renderProfile(v) {
+        v.innerHTML = `
+            <div class="h-40 bg-gradient-to-b from-red-900 to-black relative"></div>
+            <div class="px-6 -mt-12 flex flex-col items-center">
+                <div class="w-24 h-24 bg-zinc-800 rounded-2xl border-4 border-black flex items-center justify-center text-4xl shadow-2xl">👤</div>
+                <h2 class="text-2xl font-bold mt-4 text-gold">${profile.name}</h2>
+                <p class="text-zinc-500 text-sm italic">${profile.job} • Moçambique</p>
+                <button onclick="localStorage.clear(); location.reload();" class="mt-20 text-zinc-800 text-[10px] uppercase tracking-[4px]">Sair da Conta</button>
+            </div>`;
+    }
+
+    function renderShorts(v) { v.innerHTML = `<div class="p-20 text-center text-zinc-500 italic">Área de Shorts em breve...</div>`; }
+    function renderChat(v) { v.innerHTML = `<div class="p-20 text-center text-zinc-500 italic">Chat em breve...</div>`; }
 
     go('splash');
 </script>
