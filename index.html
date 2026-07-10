@@ -1,204 +1,67 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Word Music Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --gold: #FFD700; --red: #D32F2F; --fb-card: #1c1c1c; }
-        body { background-color: #000; color: white; font-family: Helvetica, Arial, sans-serif; margin: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Music Lite</title>
 
-        /* GIRASSOL ANDROID */
-        .sunflower { position: relative; width: 60px; height: 60px; animation: rotateSun 2s linear infinite; }
-        .sunflower div { position: absolute; width: 4px; height: 15px; background: var(--gold); border-radius: 10px; left: 28px; transform-origin: 2px 30px; box-shadow: 0 0 10px var(--gold); }
-        ${Array.from({length:12}).map((_,i)=>`.sunflower div:nth-child(${i+1}){transform:rotate(${i*30}deg); opacity:${1-(i*0.08)};}`).join('')}
-        @keyframes rotateSun { 100% { transform: rotate(360deg); } }
-        .animate-7v { animation: magicWriting 3.5s ease-in-out forwards; text-shadow: 0 0 20px var(--gold); }
-        @keyframes magicWriting { 0% { opacity: 0; transform: rotateY(0deg) scale(0.5); filter: blur(10px); } 100% { opacity: 1; transform: rotateY(360deg) scale(1); filter: blur(0px); } }
-
-        /* UI FACEBOOK LITE */
-        .nav-bottom { position: fixed; bottom: 0; width: 100%; background: #080808; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 10px; }
-        .nav-item.active { color: var(--red); }
-        .fb-input { background: #121212; border: 1px solid #222; padding: 12px; border-radius: 8px; width: 100%; color: white; outline: none; font-size: 14px; }
-    </style>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="app"></div>
+<div id="splash">
+    <h1>@7viDASMusic</h1>
+</div>
 
-<script>
-    // --- LIGAÇÃO AO BANCO DE DADOS (SUPABASE) ---
-    const SUPABASE_URL = "https://jyulpbusldlldnxfjqjj.supabase.co";
-    // ATENÇÃO: COLA A TUA CHAVE ABAIXO PARA O FEED FUNCIONAR!
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dWxwYnVzbGRsbGRueGZqcWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDQ4MDksImV4cCI6MjA5OTEyMDgwOX0.kzIzhthk8hJv-b0II7qx--AFdusPCenT4oPXrHr7UVg"; 
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<header>
+    <h2>🎵 Word Music Lite</h2>
+</header>
 
-    const app = document.getElementById('app');
-    let profile = JSON.parse(localStorage.getItem('wm_profile_pro')) || null;
-    let currentTab = 'home';
+<main>
 
-    function go(page) {
-        if (page === 'splash') renderSplash();
-        else if (!profile) renderRegister();
-        else { currentTab = page; renderApp(); }
-    }
+<div class="card">
 
-    // 1. SPLASH SCREEN (ENTRADA)
-    function renderSplash() {
-        app.innerHTML = `
-            <div class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[999]">
-                <div class="sunflower mb-12">${'<div></div>'.repeat(12)}</div>
-                <h1 id="logo" class="text-5xl font-black italic text-[#FFD700] opacity-0">@7viDAS</h1>
-            </div>`;
-        setTimeout(() => document.getElementById('logo').classList.add('animate-7v'), 1000);
-        setTimeout(() => go('home'), 5000);
-    }
+<h3>Criar Conta</h3>
 
-    // 2. CADASTRO (IGUAL AO FACEBOOK)
-    function renderRegister() {
-        app.innerHTML = `
-            <div class="p-8 min-h-screen">
-                <h1 class="text-gold text-2xl font-black italic mb-8 italic">Word Music Pro</h1>
-                <h2 class="text-xl font-bold mb-6">Criar nova conta</h2>
-                <div class="space-y-4">
-                    <input id="r-name" type="text" placeholder="Nome Artístico" class="fb-input">
-                    <input id="r-user" type="text" placeholder="@usuario" class="fb-input">
-                    <select id="r-job" class="fb-input">
-                        <option>Produtor</option><option>Cantor</option><option>Beatmaker</option><option>DJ</option>
-                    </select>
-                    <button onclick="saveReg()" class="w-full bg-red-700 py-3 rounded-lg font-bold mt-4">CRIAR PERFIL</button>
-                </div>
-            </div>`;
-    }
+<input type="text" placeholder="Nome">
 
-    function saveReg() {
-        const d = { name: document.getElementById('r-name').value, user: document.getElementById('r-user').value, job: document.getElementById('r-job').value };
-        if(!d.name || !d.user) return alert("Preenche os dados!");
-        localStorage.setItem('wm_profile_pro', JSON.stringify(d));
-        profile = d; go('home');
-    }
+<input type="text" placeholder="Nome de utilizador">
 
-    // 3. APP PRINCIPAL
-    function renderApp() {
-        app.innerHTML = `
-            <div class="pb-24">
-                <header class="p-4 flex justify-between items-center sticky top-0 bg-black border-b border-zinc-900 z-50">
-                    <h1 class="text-gold font-black italic text-xl">Word Music</h1>
-                    <div class="flex space-x-4"><span>🔍</span><span>👤</span></div>
-                </header>
-                <div id="view"></div>
-                <nav class="nav-bottom">
-                    <button onclick="go('home')" class="nav-item ${currentTab==='home'?'active':''}"><span>🏠</span><span>Feed</span></button>
-                    <button onclick="go('shorts')" class="nav-item ${currentTab==='shorts'?'active':''}"><span>🎞️</span><span>Shorts</span></button>
-                    <button onclick="go('chat')" class="nav-item ${currentTab==='chat'?'active':''}"><span>💬</span><span>Chat</span></button>
-                    <button onclick="go('profile')" class="nav-item ${currentTab==='profile'?'active':''}"><span>👤</span><span>Perfil</span></button>
-                </nav>
-            </div>`;
-        
-        const v = document.getElementById('view');
-        if(currentTab === 'home') renderFeed(v);
-        if(currentTab === 'profile') renderProfile(v);
-        if(currentTab === 'shorts') renderShorts(v);
-        if(currentTab === 'chat') renderChat(v);
-    }
+<select>
+<option>Selecione a Província</option>
+<option>Nampula</option>
+<option>Maputo</option>
+<option>Gaza</option>
+<option>Inhambane</option>
+<option>Sofala</option>
+<option>Manica</option>
+<option>Tete</option>
+<option>Zambézia</option>
+<option>Niassa</option>
+<option>Cabo Delgado</option>
+</select>
 
-    // --- MÓDULO FEED (ESTILO FACEBOOK LITE) ---
-    function renderFeed(v) {
-        v.innerHTML = `
-            <!-- Caixa Criar Publicação -->
-            <div class="bg-fb-card p-4 mb-2 shadow-md">
-                <div class="flex items-center space-x-3 mb-4">
-                    <div class="w-10 h-10 bg-red-900 rounded-full flex items-center justify-center font-bold text-xs border border-gold">7V</div>
-                    <div onclick="document.getElementById('modal-post').classList.remove('hidden')" class="w-full bg-black/50 text-zinc-500 rounded-full px-4 py-2 text-sm border border-zinc-800">
-                        No que estás a pensar, ${profile.name}?
-                    </div>
-                </div>
-                <div class="flex border-t border-zinc-800 pt-2">
-                    <button class="flex-1 text-[10px] font-bold text-red-500">📷 FOTO</button>
-                    <button class="flex-1 text-[10px] font-bold text-gold border-x border-zinc-800">🎵 MÚSICA</button>
-                    <button class="flex-1 text-[10px] font-bold text-blue-500">🎥 VÍDEO</button>
-                </div>
-            </div>
+<select>
+<option>Profissão Musical</option>
+<option>Produtor Musical</option>
+<option>Cantor</option>
+<option>Compositor</option>
+<option>Beatmaker</option>
+<option>DJ</option>
+<option>Pianista</option>
+<option>Guitarrista</option>
+<option>Baterista</option>
+<option>Vocalista</option>
+</select>
 
-            <!-- Modal de Escrita -->
-            <div id="modal-post" class="fixed inset-0 bg-black z-[100] p-6 hidden flex flex-col">
-                <div class="flex justify-between items-center mb-6">
-                    <button onclick="document.getElementById('modal-post').classList.add('hidden')" class="text-zinc-400 text-sm">Cancelar</button>
-                    <h3 class="font-bold">Criar publicação</h3>
-                    <button onclick="sendPost()" class="bg-red-700 px-4 py-1 rounded text-sm font-bold">Publicar</button>
-                </div>
-                <textarea id="p-txt" placeholder="O que vais gravar hoje?" class="w-full bg-transparent text-xl outline-none flex-1 resize-none"></textarea>
-            </div>
+<button>ENTRAR NO WORD MUSIC</button>
 
-            <div id="feed-list" class="space-y-2">
-                <p class="text-center p-10 text-zinc-600 animate-pulse italic">A carregar o feed de Moçambique...</p>
-            </div>`;
-        loadPosts();
-    }
+</div>
 
-    // --- FUNÇÕES DE DADOS REAIS ---
-    async function loadPosts() {
-        const { data, error } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
-        const list = document.getElementById('feed-list');
-        if(error) {
-            list.innerHTML = `<p class="text-center p-10 text-red-500">Erro ao carregar feed. Verifica a tua chave API.</p>`;
-            return;
-        }
-        if(data && list) {
-            list.innerHTML = data.map(p => `
-                <div class="bg-fb-card mb-2 border-b border-zinc-900 shadow-sm">
-                    <div class="p-4 flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-zinc-800 rounded-full border border-zinc-700 flex items-center justify-center font-bold text-xs text-gold">WM</div>
-                        <div>
-                            <p class="font-bold text-sm text-gold">${p.username}</p>
-                            <p class="text-zinc-600 text-[10px] uppercase font-mono">${new Date(p.created_at).toLocaleString()}</p>
-                        </div>
-                    </div>
-                    <div class="px-4 pb-4">
-                        <p class="text-sm leading-relaxed">${p.content}</p>
-                    </div>
-                    <div class="flex justify-around border-t border-zinc-900 py-3 text-zinc-500 text-xs font-bold uppercase italic">
-                        <button class="flex items-center space-x-1"><span>🔥</span><span>Curte</span></button>
-                        <button class="flex items-center space-x-1"><span>💬</span><span>Comenta</span></button>
-                        <button class="flex items-center space-x-1"><span>🚀</span><span>Partilha</span></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-    }
+</main>
 
-    async function sendPost() {
-        const t = document.getElementById('p-txt').value;
-        if(!t) return;
-        const { error } = await _supabase.from('posts').insert([{ username: profile.user, content: t }]);
-        if(!error) {
-            document.getElementById('p-txt').value = "";
-            document.getElementById('modal-post').classList.add('hidden');
-            loadPosts();
-        } else {
-            alert("Erro ao publicar!");
-        }
-    }
+<script src="script.js"></script>
 
-    // --- OUTRAS ABAS ---
-    function renderProfile(v) {
-        v.innerHTML = `
-            <div class="h-40 bg-gradient-to-b from-red-900 to-black relative"></div>
-            <div class="px-6 -mt-12 flex flex-col items-center">
-                <div class="w-24 h-24 bg-zinc-800 rounded-2xl border-4 border-black flex items-center justify-center text-4xl shadow-2xl">👤</div>
-                <h2 class="text-2xl font-bold mt-4 text-gold">${profile.name}</h2>
-                <p class="text-zinc-500 text-sm italic">${profile.job} • Moçambique</p>
-                <button onclick="localStorage.clear(); location.reload();" class="mt-20 text-zinc-800 text-[10px] uppercase tracking-[4px]">Sair da Conta</button>
-            </div>`;
-    }
-
-    function renderShorts(v) { v.innerHTML = `<div class="p-20 text-center text-zinc-500 italic">Área de Shorts em breve...</div>`; }
-    function renderChat(v) { v.innerHTML = `<div class="p-20 text-center text-zinc-500 italic">Chat em breve...</div>`; }
-
-    go('splash');
-</script>
 </body>
 </html>
